@@ -46,7 +46,7 @@ STATUS: Actively developing full-stack web architectures.`,
 
     const fullText = commands[cmdKey];
     let index = 0;
-    
+
     if (typingTimerRef.current) clearInterval(typingTimerRef.current);
 
     typingTimerRef.current = setInterval(() => {
@@ -75,11 +75,11 @@ STATUS: Actively developing full-stack web architectures.`,
 
   return (
     <section id="hero" className="min-h-screen pt-28 pb-12 flex flex-col justify-center items-center px-4 relative max-w-6xl mx-auto font-grotesk">
-      
+
       <div className="flex items-center gap-2 px-3 py-1 bg-neutral-900/85 border border-neutral-800 rounded-full mb-6 animate-pulse">
         <Shield className={`w-3.5 h-3.5 ${textPrimary}`} />
         <span className="font-code text-[10px] tracking-wider text-neutral-400">
-          SECURE CONNECTION ESTABLISHED // PORT: 8080
+          SECURE CONNECTION ESTABLISHED
         </span>
       </div>
 
@@ -91,7 +91,7 @@ STATUS: Actively developing full-stack web architectures.`,
           </span>
         </h1>
         <p className="text-neutral-400 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
-          Hi, I am <strong className="text-white font-medium">Manknojiya Sufiyan</strong> (Alias: <strong className="text-white font-medium">Sufill X Man</strong>). 
+          Hi, I am <strong className="text-white font-medium">Manknojiya Sufiyan</strong> (Alias: <strong className="text-white font-medium">Sufill X Man</strong>).
           A Backend Specialist and Frontend Creator shaping high-performance APIs, database architectures, and next-generation full-stack systems.
         </p>
       </div>
@@ -129,38 +129,35 @@ STATUS: Actively developing full-stack web architectures.`,
               <button
                 disabled={isTyping}
                 onClick={() => runCommand('whoami')}
-                className={`px-3 py-1.5 rounded border text-[11px] font-medium transition-all ${
-                  activeCommand === 'whoami' 
-                    ? `${borderPrimary} ${textPrimary} bg-neutral-900` 
+                className={`px-3 py-1.5 rounded border text-[11px] font-medium transition-all ${activeCommand === 'whoami'
+                    ? `${borderPrimary} ${textPrimary} bg-neutral-900`
                     : 'border-neutral-800 text-neutral-400 hover:border-neutral-700 hover:text-white'
-                }`}
+                  }`}
               >
                 whoami
               </button>
               <button
                 disabled={isTyping}
                 onClick={() => runCommand('skills')}
-                className={`px-3 py-1.5 rounded border text-[11px] font-medium transition-all ${
-                  activeCommand === 'skills' 
-                    ? `${borderPrimary} ${textPrimary} bg-neutral-900` 
+                className={`px-3 py-1.5 rounded border text-[11px] font-medium transition-all ${activeCommand === 'skills'
+                    ? `${borderPrimary} ${textPrimary} bg-neutral-900`
                     : 'border-neutral-800 text-neutral-400 hover:border-neutral-700 hover:text-white'
-                }`}
+                  }`}
               >
                 cat skills.cfg
               </button>
               <button
                 disabled={isTyping}
                 onClick={() => runCommand('target')}
-                className={`px-3 py-1.5 rounded border text-[11px] font-medium transition-all ${
-                  activeCommand === 'target' 
-                    ? `${borderPrimary} ${textPrimary} bg-neutral-900` 
+                className={`px-3 py-1.5 rounded border text-[11px] font-medium transition-all ${activeCommand === 'target'
+                    ? `${borderPrimary} ${textPrimary} bg-neutral-900`
                     : 'border-neutral-800 text-neutral-400 hover:border-neutral-700 hover:text-white'
-                }`}
+                  }`}
               >
                 ./target_2026.exe
               </button>
             </div>
-            
+
             <span className="text-[10px] text-neutral-600 hidden sm:inline">
               [CMD_EXECUTOR READY]
             </span>
@@ -174,9 +171,8 @@ STATUS: Actively developing full-stack web architectures.`,
             playClickSound();
             setShowResumeModal(true);
           }}
-          className={`group flex items-center justify-center gap-2 px-8 py-3.5 rounded-lg font-bold border transition-all duration-300 w-full sm:w-52 text-black ${bgPrimary} ${borderPrimary} hover:bg-transparent hover:text-white hover:shadow-none ${
-            themeColor === 'green' ? 'hover:border-[#00ff66]' : 'hover:border-[#00f0ff]'
-          }`}
+          className={`group flex items-center justify-center gap-2 px-8 py-3.5 rounded-lg font-bold border transition-all duration-300 w-full sm:w-52 text-black ${bgPrimary} ${borderPrimary} hover:bg-transparent hover:text-white hover:shadow-none ${themeColor === 'green' ? 'hover:border-[#00ff66]' : 'hover:border-[#00f0ff]'
+            }`}
           data-magnetic
         >
           <Play className="w-4 h-4 fill-current transition-transform group-hover:scale-110" />
@@ -199,7 +195,7 @@ STATUS: Actively developing full-stack web architectures.`,
       {showResumeModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-4 overflow-y-auto">
           <div className="relative w-full max-w-4xl bg-neutral-900 border border-neutral-800 rounded-xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
-            
+
             <div className="flex items-center justify-between px-6 py-4 bg-neutral-950 border-b border-neutral-800 print:hidden">
               <span className="font-bold text-sm tracking-widest text-white flex items-center gap-2">
                 <Shield className={`w-4 h-4 ${textPrimary}`} />
