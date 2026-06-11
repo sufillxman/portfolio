@@ -51,15 +51,15 @@ export default function Navbar({
         
         <div 
           onClick={() => handleNavClick('hero')}
-          className="flex items-center gap-2 cursor-pointer group"
+          className="flex items-center gap-1.5 cursor-pointer group"
         >
-          <div className={`p-1.5 rounded border ${borderClass} transition-all duration-300 group-hover:scale-105`}>
-            <Terminal className={`w-5 h-5 ${textPrimary} animate-pulse`} />
+          <div className={`p-1 rounded border ${borderClass} transition-all duration-300 group-hover:scale-105`}>
+            <Terminal className={`w-4 h-4 ${textPrimary} animate-pulse`} />
           </div>
-          <span className="font-grotesk font-bold tracking-widest text-lg uppercase hidden sm:inline-block">
+          <span className="font-grotesk font-bold tracking-widest text-base uppercase hidden sm:inline-block">
             SUFILL<span className={textPrimary}>_X_</span>MAN
           </span>
-          <span className="font-grotesk font-bold tracking-widest text-lg uppercase sm:hidden">
+          <span className="font-grotesk font-bold tracking-widest text-sm uppercase sm:hidden">
             SFX<span className={textPrimary}>X</span>M
           </span>
         </div>
@@ -79,7 +79,7 @@ export default function Navbar({
           </button>
         </nav>
 
-        <div className="flex items-center gap-2 sm:gap-4 font-code text-[10px] tracking-wider text-neutral-400">
+        <div className="flex items-center gap-1.5 sm:gap-4 font-code text-[10px] tracking-wider text-neutral-400">
           
           <div className="hidden sm:flex items-center gap-1.5 bg-neutral-900/60 px-2.5 py-1 rounded border border-neutral-800">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
@@ -140,7 +140,8 @@ export default function Navbar({
             )}
           </button>
 
-          <div className="flex items-center gap-2 border-l border-neutral-800 pl-3">
+          {/* Social Icons Panel (Hidden on mobile navbar to save space) */}
+          <div className="hidden sm:flex items-center gap-2 border-l border-neutral-800 pl-3">
             <a 
               href="https://www.linkedin.com/in/sufill-x-man/" 
               target="_blank" 
