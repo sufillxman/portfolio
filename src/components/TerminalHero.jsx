@@ -1,50 +1,49 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Terminal, Shield, Play, ArrowRight, X, Printer } from 'lucide-react';
 
-export default function TerminalHero({ themeColor = 'green', playClickSound, onInitializeContact }) {
-  const [terminalCommand, setTerminalCommand] = useState('');
-  const [activeCommand, setActiveCommand] = useState('whoami');
+export default function TerminalHero({ themeColor = 'green', playClickSound, onInitializeContact, profile }) {
+  const [terminalCommand, setTerminalCommand] = useState('whoami');
   const [typedOutput, setTypedOutput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [showResumeModal, setShowResumeModal] = useState(false);
   const typingTimerRef = useRef(null);
 
+  const ts = profile?.tech_stack || {};
+  const name = profile?.full_name || 'Manknojiya Sufiyan Bhai Aiyub Bhai';
+  const alias = profile?.alias || 'Sufill X Man';
+  const status = profile?.current_status || 'Freelance Web Developer & Student';
+
   const commands = {
     whoami: `> Fetching system identity...
-NAME: Manknojiya Sufiyan Bhai Aiyub Bhai
-ALIAS: Sufill X Man
-ROLE: Freelance Web Developer & Student
+NAME: ${name}
+ALIAS: ${alias}
+ROLE: ${status}
 ACADEMICS: Pursuing BCA (Bachelor of Computer Applications)
 STATUS: Actively developing full-stack web architectures.`,
 
     skills: `> Initializing tech stack analysis...
 [BACKEND CONTEXT]
- - Language: Python
- - Frameworks: Django, Django REST Framework (DRF)
- - Database: MySQL, PostgreSQL
+ - ${(ts.backend || ['Python', 'Django', 'DRF']).join('\n - ')}
 [FRONTEND CONTEXT]
- - Framework: React.js
- - Styling: Tailwind CSS, CSS3, Vanilla HTML5
- - Language: Modern JavaScript (ES6+)`,
+ - ${(ts.frontend || ['React', 'Tailwind CSS', 'JavaScript']).join('\n - ')}`,
 
     target: `> Projecting milestones to target 2026...
 [TARGET 2026]
- OBJECTIVE: Evolve into a Top-Tier AI, Web & API Full-Stack Developer.
+ OBJECTIVE: ${profile?.goal || 'Evolve into a Top-Tier AI, Web & API Full-Stack Developer.'}
  FOCUS AREAS: 
   - LLM Fine-Tuning & Prompt Engineering
   - Autonomous Agent & Drone Protocol API integration
   - Production-grade High-Availability Microservices`
   };
 
-  const runCommand = (cmdKey) => {
-    if (isTyping) return;
-    playClickSound();
-    setActiveCommand(cmdKey);
+  const [activeCommand, setActiveCommand] = useState('whoami');
+
+  const triggerTyping = (cmdKey) => {
     setIsTyping(true);
     setTerminalCommand(cmdKey);
     setTypedOutput('');
 
-    const fullText = commands[cmdKey];
+    const fullText = commands[cmdKey] || '';
     let index = 0;
 
     if (typingTimerRef.current) clearInterval(typingTimerRef.current);
@@ -61,11 +60,20 @@ STATUS: Actively developing full-stack web architectures.`,
   };
 
   useEffect(() => {
-    runCommand('whoami');
+    triggerTyping(activeCommand);
     return () => {
       if (typingTimerRef.current) clearInterval(typingTimerRef.current);
     };
-  }, []);
+  }, [activeCommand, profile]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleCommandClick = (cmdKey) => {
+    playClickSound();
+    if (activeCommand === cmdKey) {
+      triggerTyping(cmdKey);
+    } else {
+      setActiveCommand(cmdKey);
+    }
+  };
 
   const textPrimary = themeColor === 'green' ? 'text-[#00ff66]' : 'text-[#00f0ff]';
   const borderPrimary = themeColor === 'green' ? 'border-[#00ff66]' : 'border-[#00f0ff]';
@@ -76,7 +84,7 @@ STATUS: Actively developing full-stack web architectures.`,
   return (
     <section id="hero" className="min-h-screen pt-28 pb-12 flex flex-col justify-center items-center px-4 relative max-w-6xl mx-auto font-grotesk">
 
-      <div className="flex items-center gap-2 px-3 py-1 bg-neutral-900/85 border border-neutral-800 rounded-full mb-6 animate-pulse">
+      <div className="flex items-center gap-2 px-3 py-1 bg-neutral-900/85 border border-neutral-800 rounded-full mb-6 animate-pulse-slow">
         <Shield className={`w-3.5 h-3.5 ${textPrimary}`} />
         <span className="font-code text-[10px] tracking-wider text-neutral-400">
           SECURE CONNECTION ESTABLISHED
@@ -91,8 +99,8 @@ STATUS: Actively developing full-stack web architectures.`,
           </span>
         </h1>
         <p className="text-neutral-400 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
-          Hi, I am <strong className="text-white font-medium">Manknojiya Sufiyan</strong> (Alias: <strong className="text-white font-medium">Sufill X Man</strong>).
-          A Backend Specialist and Frontend Creator shaping high-performance APIs, database architectures, and next-generation full-stack systems.
+          Hi, I am <strong className="text-white font-medium">{name}</strong> (Alias: <strong className="text-white font-medium">{alias}</strong>).
+          {profile?.bio || ' A Backend Specialist and Frontend Creator shaping high-performance APIs, database architectures, and next-generation full-stack systems.'}
         </p>
       </div>
 
@@ -127,8 +135,7 @@ STATUS: Actively developing full-stack web architectures.`,
           <div className="mt-6 border-t border-neutral-900 pt-4 flex flex-wrap gap-2 items-center justify-between">
             <div className="flex flex-wrap gap-2">
               <button
-                disabled={isTyping}
-                onClick={() => runCommand('whoami')}
+                onClick={() => handleCommandClick('whoami')}
                 className={`px-3 py-1.5 rounded border text-[11px] font-medium transition-all ${activeCommand === 'whoami'
                     ? `${borderPrimary} ${textPrimary} bg-neutral-900`
                     : 'border-neutral-800 text-neutral-400 hover:border-neutral-700 hover:text-white'
@@ -137,8 +144,7 @@ STATUS: Actively developing full-stack web architectures.`,
                 whoami
               </button>
               <button
-                disabled={isTyping}
-                onClick={() => runCommand('skills')}
+                onClick={() => handleCommandClick('skills')}
                 className={`px-3 py-1.5 rounded border text-[11px] font-medium transition-all ${activeCommand === 'skills'
                     ? `${borderPrimary} ${textPrimary} bg-neutral-900`
                     : 'border-neutral-800 text-neutral-400 hover:border-neutral-700 hover:text-white'
@@ -147,8 +153,7 @@ STATUS: Actively developing full-stack web architectures.`,
                 cat skills.cfg
               </button>
               <button
-                disabled={isTyping}
-                onClick={() => runCommand('target')}
+                onClick={() => handleCommandClick('target')}
                 className={`px-3 py-1.5 rounded border text-[11px] font-medium transition-all ${activeCommand === 'target'
                     ? `${borderPrimary} ${textPrimary} bg-neutral-900`
                     : 'border-neutral-800 text-neutral-400 hover:border-neutral-700 hover:text-white'
@@ -171,9 +176,8 @@ STATUS: Actively developing full-stack web architectures.`,
             playClickSound();
             setShowResumeModal(true);
           }}
-          className={`group flex items-center justify-center gap-2 px-8 py-3.5 rounded-lg font-bold border transition-all duration-300 w-full sm:w-52 text-black ${bgPrimary} ${borderPrimary} hover:bg-transparent hover:text-white hover:shadow-none ${themeColor === 'green' ? 'hover:border-[#00ff66]' : 'hover:border-[#00f0ff]'
+          className={`group relative flex items-center justify-center gap-2 px-8 py-3.5 rounded-lg font-bold border transition-all duration-300 w-full sm:w-52 text-black ${bgPrimary} ${borderPrimary} hover:bg-transparent hover:text-white hover:shadow-none ${themeColor === 'green' ? 'hover:border-[#00ff66]' : 'hover:border-[#00f0ff]'
             }`}
-          data-magnetic
         >
           <Play className="w-4 h-4 fill-current transition-transform group-hover:scale-110" />
           <span>Deploy Resume</span>
@@ -184,8 +188,7 @@ STATUS: Actively developing full-stack web architectures.`,
             playClickSound();
             onInitializeContact();
           }}
-          className="flex items-center justify-center gap-2 px-8 py-3.5 rounded-lg font-bold border border-solid transition-all duration-300 w-full sm:w-52 bg-transparent text-white border-neutral-800 hover:border-white"
-          data-magnetic
+          className="group flex items-center justify-center gap-2 px-8 py-3.5 rounded-lg font-bold border border-solid transition-all duration-300 w-full sm:w-52 bg-transparent text-white border-neutral-800 hover:border-white"
         >
           <span>Initialize Contact</span>
           <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
@@ -222,14 +225,14 @@ STATUS: Actively developing full-stack web architectures.`,
               <div className="border-b-2 border-neutral-900 pb-6 mb-6 flex flex-col md:flex-row md:items-end justify-between">
                 <div>
                   <h1 className="text-3xl font-extrabold text-neutral-900 leading-none mb-1">
-                    Manknojiya Sufiyan Bhai Aiyub Bhai
+                    {name}
                   </h1>
                   <p className="text-neutral-500 font-code text-sm font-semibold">
-                    Alias: Sufill X Man | BCA Student & Full-Stack Developer
+                    Alias: {alias} | BCA Student & Full-Stack Developer
                   </p>
                 </div>
                 <div className="text-left md:text-right mt-4 md:mt-0 font-code text-xs text-neutral-600 space-y-1">
-                  <div>Email: sufilldigital@gmail.com</div>
+                  <div>Email: {profile?.email || 'sufilldigital@gmail.com'}</div>
                   <div>GitHub: github.com/sufillxman</div>
                   <div>LinkedIn: linkedin.com/in/sufill-x-man</div>
                 </div>
@@ -244,15 +247,15 @@ STATUS: Actively developing full-stack web architectures.`,
                     <div className="space-y-4">
                       <div>
                         <div className="text-xs font-bold text-neutral-700">Backend Development</div>
-                        <div className="text-xs text-neutral-600 font-code mt-1">Python, Django, Django REST Framework (DRF), MySQL, PostgreSQL</div>
+                        <div className="text-xs text-neutral-600 font-code mt-1">{(ts.backend || ['Python', 'Django', 'DRF', 'MySQL', 'PostgreSQL']).join(', ')}</div>
                       </div>
                       <div>
                         <div className="text-xs font-bold text-neutral-700">Frontend Development</div>
-                        <div className="text-xs text-neutral-600 font-code mt-1">React, Tailwind CSS, JavaScript (ES6+), HTML5, CSS3</div>
+                        <div className="text-xs text-neutral-600 font-code mt-1">{(ts.frontend || ['React', 'Tailwind CSS', 'JavaScript', 'HTML5', 'CSS3']).join(', ')}</div>
                       </div>
                       <div>
                         <div className="text-xs font-bold text-neutral-700">Tools & Platforms</div>
-                        <div className="text-xs text-neutral-600 font-code mt-1">Git, GitHub Education, CapacitorJS, Vite</div>
+                        <div className="text-xs text-neutral-600 font-code mt-1">{(ts.tools || ['Git', 'GitHub Education', 'CapacitorJS', 'Vite']).join(', ')}</div>
                       </div>
                     </div>
                   </div>
@@ -285,7 +288,7 @@ STATUS: Actively developing full-stack web architectures.`,
                       Professional Objective
                     </h3>
                     <p className="text-xs text-neutral-600 leading-relaxed">
-                      Driven BCA undergraduate and active freelance developer dedicated to engineering reliable, secure backend APIs and dynamic frontends. Projecting to escalate core expertise in LLM agents, cloud infrastructure integrations, and high-availability database scaling to stand as a top-tier Full-Stack AI Engineer by 2026.
+                      {profile?.goal || 'Driven BCA undergraduate and active freelance developer dedicated to engineering reliable, secure backend APIs and dynamic frontends. Projecting to escalate core expertise in LLM agents, cloud infrastructure integrations, and high-availability database scaling to stand as a top-tier Full-Stack AI Engineer by 2026.'}
                     </p>
                   </div>
 

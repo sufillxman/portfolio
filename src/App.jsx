@@ -1,16 +1,35 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import TerminalHero from './components/TerminalHero';
 import ProjectsGrid from './components/ProjectsGrid';
 import Timeline from './components/Timeline';
 import TerminalContact from './components/TerminalContact';
 import InteractiveBackground from './components/InteractiveBackground';
+import Toast from './components/Toast';
+import { getProfile } from './services/api';
 import { Shield, ShieldCheck, Heart } from 'lucide-react';
 
 function App() {
   const [themeColor, setThemeColor] = useState('green');
   const [backgroundMode, setBackgroundMode] = useState('matrix');
   const [soundEnabled, setSoundEnabled] = useState(false);
+  const [profile, setProfile] = useState(null);
+  const [toast, setToast] = useState(null);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    if (window.location.hash) {
+      history.replaceState(null, '', window.location.pathname);
+    }
+  }, []);
+
+  useEffect(() => {
+    getProfile().then(setProfile);
+  }, []);
+
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
+  };
 
   const playClickSound = () => {
     if (!soundEnabled) return;
@@ -18,16 +37,12 @@ function App() {
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
-
       osc.type = 'sine';
       osc.frequency.setValueAtTime(900, audioCtx.currentTime);
-
       gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.06);
-
       osc.connect(gain);
       gain.connect(audioCtx.destination);
-
       osc.start();
       osc.stop(audioCtx.currentTime + 0.06);
     } catch (e) {
@@ -47,7 +62,6 @@ function App() {
   return (
     <>
       <InteractiveBackground themeColor={themeColor} mode={backgroundMode} />
-
       <div className="scanlines" />
 
       <div className="min-h-screen flex flex-col justify-between selection:bg-[#00ff66]/20 selection:text-[#00ff66] text-neutral-300 antialiased relative z-10">
@@ -60,6 +74,7 @@ function App() {
           soundEnabled={soundEnabled}
           setSoundEnabled={setSoundEnabled}
           playClickSound={playClickSound}
+          profile={profile}
         />
 
         <main className="flex-grow">
@@ -67,6 +82,7 @@ function App() {
             themeColor={themeColor} 
             playClickSound={playClickSound}
             onInitializeContact={handleInitializeContact}
+            profile={profile}
           />
 
           <ProjectsGrid 
@@ -82,6 +98,7 @@ function App() {
           <TerminalContact 
             themeColor={themeColor} 
             playClickSound={playClickSound}
+            showToast={showToast}
           />
         </main>
 
@@ -91,7 +108,7 @@ function App() {
             <div className="flex items-center gap-2">
               <Shield className={`w-4 h-4 ${textPrimary}`} />
               <span>
-                SYS: <span className="text-white font-bold">STABLE</span> | DATABASE: <span className={textPrimary}>LOCAL_CACHE</span>
+                SYS: <span className="text-white font-bold">STABLE</span> | DATABASE: <span className={textPrimary}>LIVE_API</span>
               </span>
             </div>
 
@@ -99,14 +116,14 @@ function App() {
               <div className="flex items-center gap-1.5">
                 <span>Made with</span>
                 <Heart className="w-3.5 h-3.5 text-red-500 fill-current animate-pulse" />
-                <span>by <strong className="text-neutral-300">Manknojiya Sufiyan</strong></span>
+                <span>by <strong className="text-neutral-300">{profile?.alias || 'Manknojiya Sufiyan'}</strong></span>
               </div>
               <div className="flex items-center gap-4 text-xs font-grotesk mt-1">
-                <a href="https://www.linkedin.com/in/sufill-x-man/" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">LinkedIn</a>
+                <a href={profile?.linkedin || 'https://www.linkedin.com/in/sufill-x-man/'} target="_blank" rel="noreferrer" className="hover:text-white transition-colors">LinkedIn</a>
                 <span>•</span>
-                <a href="https://github.com/sufillxman" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">GitHub</a>
+                <a href={profile?.github || 'https://github.com/sufillxman'} target="_blank" rel="noreferrer" className="hover:text-white transition-colors">GitHub</a>
                 <span>•</span>
-                <a href="https://www.instagram.com/sufilldigital/" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">Instagram</a>
+                <a href={profile?.instagram || 'https://www.instagram.com/sufilldigital/'} target="_blank" rel="noreferrer" className="hover:text-white transition-colors">Instagram</a>
               </div>
             </div>
 
@@ -124,6 +141,14 @@ function App() {
         </footer>
 
       </div>
+
+      {toast && (
+        <Toast 
+          message={toast.message} 
+          type={toast.type} 
+          onClose={() => setToast(null)} 
+        />
+      )}
     </>
   );
 }

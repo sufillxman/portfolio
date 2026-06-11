@@ -1,10 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getProjects } from '../services/api';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Code2, ChevronRight } from 'lucide-react';
+
+function useInView(threshold = 0.1) {
+  const ref = useRef(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setInView(true); observer.unobserve(el); } },
+      { threshold }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [threshold]);
+
+  return [ref, inView];
+}
 
 export default function ProjectsGrid({ themeColor = 'green', playClickSound }) {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [sectionRef, inView] = useInView(0.05);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -90,10 +109,17 @@ export default function ProjectsGrid({ themeColor = 'green', playClickSound }) {
   };
 
   return (
-    <section id="projects" className="py-20 px-4 max-w-7xl mx-auto border-t border-neutral-900/60 relative font-grotesk">
+    <section
+      id="projects"
+      ref={sectionRef}
+      className={`py-20 px-4 max-w-7xl mx-auto border-t border-neutral-900/60 relative font-grotesk transition-all duration-700 ${
+        inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+      }`}
+    >
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
         <div>
-          <span className={`font-code text-xs tracking-widest ${textPrimary} uppercase block mb-2`}>
+          <span className={`font-code text-xs tracking-widest ${textPrimary} uppercase block mb-2 flex items-center gap-2`}>
+            <Code2 className="w-3.5 h-3.5" />
             // WORKSPACE & DEPLOYMENTS
           </span>
           <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white">
@@ -121,10 +147,11 @@ export default function ProjectsGrid({ themeColor = 'green', playClickSound }) {
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {projects.map((project) => (
+          {projects.map((project, index) => (
             <div
               key={project.id}
-              className={`bg-neutral-950/80 rounded-xl border border-neutral-900 p-6 flex flex-col justify-between transition-all duration-300 backdrop-blur-sm group ${hoverBorder} ${hoverShadow}`}
+              className={`bg-neutral-950/80 rounded-xl border border-neutral-900 p-6 flex flex-col justify-between transition-all duration-500 backdrop-blur-sm group ${hoverBorder} ${hoverShadow}`}
+              style={{ transitionDelay: `${index * 100}ms` }}
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
@@ -144,6 +171,8 @@ export default function ProjectsGrid({ themeColor = 'green', playClickSound }) {
                     onClick={() => playClickSound()}
                     className="text-neutral-500 hover:text-white transition-colors"
                     title="Open Repository"
+                    target="_blank"
+                    rel="noreferrer"
                   >
                     <ExternalLink className="w-4 h-4" />
                   </a>
@@ -171,7 +200,10 @@ export default function ProjectsGrid({ themeColor = 'green', playClickSound }) {
                 </div>
 
                 <div className="text-[10px] text-neutral-500 font-code flex items-center justify-between border-t border-neutral-900 pt-3">
-                  <span>ROLE: {project.role}</span>
+                  <span className="flex items-center gap-1">
+                    <ChevronRight className="w-3 h-3" />
+                    ROLE: {project.role}
+                  </span>
                 </div>
               </div>
             </div>

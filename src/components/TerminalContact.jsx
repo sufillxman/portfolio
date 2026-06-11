@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { sendContactMessage, getSavedMessages } from '../services/api';
-import { Mail, CheckCircle2, Send, Loader2, Database } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { sendContactMessage } from '../services/api';
+import { Mail, CheckCircle2, Send, Loader2, Database, RefreshCw } from 'lucide-react';
 
-export default function TerminalContact({ themeColor = 'green', playClickSound }) {
+export default function TerminalContact({ themeColor = 'green', playClickSound, showToast }) {
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
   const [inputVal, setInputVal] = useState('');
@@ -11,13 +11,29 @@ export default function TerminalContact({ themeColor = 'green', playClickSound }
     'System: Secure gateway established. Ready for input.'
   ]);
   const [submitting, setSubmitting] = useState(false);
-  const [savedMessages, setSavedMessages] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [loadingMessages, setLoadingMessages] = useState(false);
 
   const inputRef = useRef(null);
   const logContainerRef = useRef(null);
 
+  const fetchMessages = async () => {
+    setLoadingMessages(true);
+    try {
+      const res = await fetch('/api/contact/');
+      if (res.ok) {
+        const data = await res.json();
+        setMessages(data);
+      }
+    } catch {
+      console.warn('Could not fetch messages');
+    } finally {
+      setLoadingMessages(false);
+    }
+  };
+
   useEffect(() => {
-    setSavedMessages(getSavedMessages());
+    fetchMessages();
   }, []);
 
   useEffect(() => {
@@ -77,13 +93,15 @@ export default function TerminalContact({ themeColor = 'green', playClickSound }
       const res = await sendContactMessage(formData);
       if (res.success) {
         addLog(`System: Success! Message logged on backend database.`);
-        setSavedMessages(getSavedMessages());
+        showToast?.('Message sent successfully! I\'ll get back to you soon.', 'success');
+        fetchMessages();
         setStep(4);
       } else {
         throw new Error("Rejection");
       }
-    } catch (err) {
+    } catch {
       addLog(`[Error] Failed to transmit message. Check your server logs.`);
+      showToast?.('Failed to send message. Please try again.', 'error');
       setSubmitting(false);
     }
   };
@@ -100,14 +118,13 @@ export default function TerminalContact({ themeColor = 'green', playClickSound }
   };
 
   const textPrimary = themeColor === 'green' ? 'text-[#00ff66]' : 'text-[#00f0ff]';
-  const borderPrimary = themeColor === 'green' ? 'border-[#00ff66]' : 'border-[#00f0ff]';
   const bgPrimary = themeColor === 'green' ? 'bg-[#00ff66]' : 'bg-[#00f0ff]';
   const glowShadow = themeColor === 'green' ? 'shadow-[0_0_20px_rgba(0,255,102,0.25)]' : 'shadow-[0_0_20px_rgba(0,240,255,0.25)]';
   const borderLight = themeColor === 'green' ? 'border-[#00ff66]/20' : 'border-[#00f0ff]/20';
 
   return (
     <section id="contact" className="py-20 px-4 max-w-4xl mx-auto border-t border-neutral-900/60 relative font-grotesk">
-      
+
       <div className="text-center mb-12">
         <span className={`font-code text-xs tracking-widest ${textPrimary} uppercase block mb-2`}>
           // GET IN TOUCH
@@ -116,12 +133,12 @@ export default function TerminalContact({ themeColor = 'green', playClickSound }
           Contact Me
         </h2>
         <p className="text-neutral-400 text-sm max-w-md mx-auto mt-4 leading-relaxed">
-          Fill out this interactive form to send me an email. Your messages will show up in the live outbox list below.
+          Fill out this interactive form to send me a message. Your messages are stored in the database and show up in the live outbox below.
         </p>
       </div>
 
       <div className={`w-full bg-neutral-950/80 rounded-xl border ${borderLight} ${glowShadow} overflow-hidden backdrop-blur-md transition-all duration-300 mb-8`}>
-        
+
         <div className="flex items-center justify-between px-4 py-3 bg-neutral-900/60 border-b border-neutral-900">
           <div className="flex items-center gap-2">
             <Mail className="w-3.5 h-3.5 text-neutral-500" />
@@ -135,17 +152,17 @@ export default function TerminalContact({ themeColor = 'green', playClickSound }
         </div>
 
         <div className="p-6 font-code text-xs sm:text-sm">
-          
-          <div 
+
+          <div
             ref={logContainerRef}
-            className="space-y-2 mb-6 max-h-40 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-neutral-800 text-neutral-400"
+            className="space-y-2 mb-6 max-h-40 overflow-y-auto pr-2 text-neutral-400 scrollbar-thin"
           >
             {logs.map((log, index) => {
               let color = 'text-neutral-400';
               if (log.startsWith('[Error]')) color = 'text-red-500 font-bold';
               else if (log.startsWith('guest@sfx-portal')) color = 'text-white';
               else if (log.includes('Success!') || log.includes('verified')) color = textPrimary + ' font-semibold';
-              
+
               return (
                 <div key={index} className={`${color} leading-relaxed`}>
                   {log}
@@ -155,7 +172,7 @@ export default function TerminalContact({ themeColor = 'green', playClickSound }
           </div>
 
           <div className="bg-neutral-900/40 border border-neutral-900 p-4 rounded-lg">
-            
+
             {step === 0 && (
               <form onSubmit={handleNext} className="space-y-4">
                 <label className="block text-neutral-400">
@@ -172,7 +189,7 @@ export default function TerminalContact({ themeColor = 'green', playClickSound }
                     placeholder="E.g., Sufiyan"
                     required
                   />
-                  <button type="submit" className={`px-4 py-1.5 rounded ${bgPrimary} text-black font-bold text-xs uppercase hover:opacity-90`}>
+                  <button type="submit" className={`px-4 py-1.5 rounded ${bgPrimary} text-black font-bold text-xs uppercase hover:opacity-90 shrink-0`}>
                     Next
                   </button>
                 </div>
@@ -195,7 +212,7 @@ export default function TerminalContact({ themeColor = 'green', playClickSound }
                     placeholder="E.g., contact@mail.com"
                     required
                   />
-                  <button type="submit" className={`px-4 py-1.5 rounded ${bgPrimary} text-black font-bold text-xs uppercase hover:opacity-90`}>
+                  <button type="submit" className={`px-4 py-1.5 rounded ${bgPrimary} text-black font-bold text-xs uppercase hover:opacity-90 shrink-0`}>
                     Next
                   </button>
                 </div>
@@ -218,7 +235,7 @@ export default function TerminalContact({ themeColor = 'green', playClickSound }
                     placeholder="Hello, let's connect for projects..."
                     required
                   />
-                  <button type="submit" className={`px-4 py-1.5 rounded ${bgPrimary} text-black font-bold text-xs uppercase hover:opacity-90`}>
+                  <button type="submit" className={`px-4 py-1.5 rounded ${bgPrimary} text-black font-bold text-xs uppercase hover:opacity-90 shrink-0`}>
                     Next
                   </button>
                 </div>
@@ -275,7 +292,7 @@ export default function TerminalContact({ themeColor = 'green', playClickSound }
                   Message Sent Successfully!
                 </h4>
                 <p className="text-xs text-neutral-400 max-w-sm mx-auto leading-relaxed font-grotesk">
-                  Your message has been processed and saved. Check the live outbox list below to view the output.
+                  Your message has been processed and saved to the database. Check the live outbox below.
                 </p>
                 <button
                   onClick={handleReset}
@@ -295,23 +312,37 @@ export default function TerminalContact({ themeColor = 'green', playClickSound }
         <div className="flex items-center justify-between border-b border-neutral-900 pb-3 mb-4">
           <span className="flex items-center gap-2 font-bold text-neutral-300 text-[10px] tracking-wider uppercase">
             <Database className={`w-4 h-4 ${textPrimary}`} />
-            Live Outbox Messages Log (Local Cache)
+            Live Outbox Messages (Database)
           </span>
-          <span className="text-[9px] text-neutral-500">
-            TOTAL: {savedMessages.length} MESSAGE(S)
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="text-[9px] text-neutral-500">
+              TOTAL: {messages.length} MESSAGE(S)
+            </span>
+            <button
+              onClick={() => { playClickSound(); fetchMessages(); }}
+              disabled={loadingMessages}
+              className="text-neutral-500 hover:text-white transition-colors"
+              title="Refresh messages"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${loadingMessages ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
         </div>
 
-        {savedMessages.length === 0 ? (
+        {loadingMessages && messages.length === 0 ? (
           <div className="text-center py-8 text-neutral-600">
-            No messages sent yet. Fill out the terminal form above to see your submissions logged here in real-time.
+            Loading messages...
+          </div>
+        ) : messages.length === 0 ? (
+          <div className="text-center py-8 text-neutral-600">
+            No messages yet. Fill out the terminal form above to see your submissions here.
           </div>
         ) : (
           <div className="space-y-3 max-h-60 overflow-y-auto pr-2 scrollbar-thin">
-            {savedMessages.map((msg) => (
+            {messages.map((msg) => (
               <div key={msg.id} className="p-3 bg-neutral-900/50 rounded border border-neutral-900 flex flex-col gap-1 select-text">
                 <div className="flex justify-between items-center text-[10px] text-neutral-500 border-b border-neutral-900 pb-1 mb-1">
-                  <span>TIMESTAMP: {msg.timestamp}</span>
+                  <span>TIMESTAMP: {new Date(msg.created_at).toLocaleString()}</span>
                   <span className={textPrimary}>ID: {msg.id}</span>
                 </div>
                 <div><span className="text-neutral-500 font-bold">FROM:</span> <span className="text-white">{msg.name}</span> (<span className="text-neutral-300">{msg.email}</span>)</div>
@@ -321,7 +352,7 @@ export default function TerminalContact({ themeColor = 'green', playClickSound }
           </div>
         )}
       </div>
-      
+
     </section>
   );
 }

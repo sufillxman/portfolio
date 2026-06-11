@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Terminal, Clock, Volume2, VolumeX, Grid, Code, Power, Linkedin, Github, Instagram, Menu, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Terminal, Clock, Volume2, VolumeX, Grid, Code, Linkedin, Github, Instagram, Menu, X } from 'lucide-react';
 
 export default function Navbar({ 
   themeColor, 

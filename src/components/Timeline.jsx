@@ -1,27 +1,80 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getMilestones } from '../services/api';
-import { ShieldCheck, ChevronRight } from 'lucide-react';
+import { ShieldCheck, ChevronRight, ScrollText } from 'lucide-react';
+
+function useInView(threshold = 0.1) {
+  const ref = useRef(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setInView(true); observer.unobserve(el); } },
+      { threshold }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [threshold]);
+
+  return [ref, inView];
+}
 
 export default function Timeline({ themeColor = 'green', playClickSound }) {
   const [milestones, setMilestones] = useState([]);
   const [activeMilestoneId, setActiveMilestoneId] = useState('m-1');
+  const [sectionRef, inView] = useInView(0.05);
+
+  const autoRotateRef = useRef(null);
 
   useEffect(() => {
     const fetchMilestones = async () => {
       const data = await getMilestones();
       setMilestones(data);
+      if (data.length > 0) setActiveMilestoneId(data[0].id);
     };
     fetchMilestones();
   }, []);
+
+  const clearAutoRotate = () => {
+    if (autoRotateRef.current) {
+      clearInterval(autoRotateRef.current);
+      autoRotateRef.current = null;
+    }
+  };
+
+  const startAutoRotate = () => {
+    clearAutoRotate();
+    autoRotateRef.current = setInterval(() => {
+      setActiveMilestoneId((prev) => {
+        const currentIndex = milestones.findIndex((m) => m.id === prev);
+        const nextIndex = (currentIndex + 1) % milestones.length;
+        return milestones[nextIndex].id;
+      });
+    }, 4000);
+  };
+
+  useEffect(() => {
+    if (milestones.length === 0) return;
+    startAutoRotate();
+    return clearAutoRotate;
+  }, [milestones]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleMilestoneClick = (id) => {
+    playClickSound();
+    setActiveMilestoneId(id);
+    startAutoRotate();
+  };
 
   const textPrimary = themeColor === 'green' ? 'text-[#00ff66]' : 'text-[#00f0ff]';
   const borderPrimary = themeColor === 'green' ? 'border-[#00ff66]' : 'border-[#00f0ff]';
   const bgPrimary = themeColor === 'green' ? 'bg-[#00ff66]' : 'bg-[#00f0ff]';
   const glowShadow = themeColor === 'green' ? 'shadow-[0_0_15px_rgba(0,255,102,0.3)]' : 'shadow-[0_0_15px_rgba(0,240,255,0.3)]';
-  const borderLight = themeColor === 'green' ? 'border-[#00ff66]/20' : 'border-[#00f0ff]/20';
   
-  const getLogVerification = (milestoneId) => {
-    switch (milestoneId) {
+  const getLogVerification = (milestone) => {
+    if (!milestone) return '';
+    const id = milestone.id;
+    switch (id) {
       case 'm-1':
         return `[VISION CONFIG]
 TARGET_YEAR = 2026
@@ -49,15 +102,26 @@ TECH_DEFAULT = ["Python-Django", "DRF", "React", "PostgreSQL"]
 TOTAL_CLIENTS_SERVED = 10+
 FEEDBACK_SCORE = 1.00 (Max Integrity)`;
       default:
-        return '';
+        return `[LOG_ENTRY]
+ID = ${id}
+TITLE = "${milestone.title}"
+YEAR = ${milestone.year}
+BADGE = ${milestone.badge}
+STATUS = VERIFIED`;
     }
   };
 
   return (
-    <section id="timeline" className="py-20 px-4 max-w-7xl mx-auto border-t border-neutral-900/60 relative font-grotesk">
-      
+    <section
+      id="timeline"
+      ref={sectionRef}
+      className={`py-20 px-4 max-w-7xl mx-auto border-t border-neutral-900/60 relative font-grotesk transition-all duration-700 ${
+        inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+      }`}
+    >
       <div className="mb-12">
-        <span className={`font-code text-xs tracking-widest ${textPrimary} uppercase block mb-2`}>
+        <span className={`font-code text-xs tracking-widest ${textPrimary} uppercase block mb-2 flex items-center gap-2`}>
+          <ScrollText className="w-3.5 h-3.5" />
           // VERIFIED LOG & METRICS
         </span>
         <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white">
@@ -74,10 +138,7 @@ FEEDBACK_SCORE = 1.00 (Max Integrity)`;
               <div 
                 key={item.id} 
                 className="relative group cursor-pointer"
-                onClick={() => {
-                  playClickSound();
-                  setActiveMilestoneId(item.id);
-                }}
+                onClick={() => handleMilestoneClick(item.id)}
               >
                 <div 
                   className={`absolute -left-[41px] top-1.5 w-6 h-6 rounded-full border border-neutral-900 bg-neutral-950 flex items-center justify-center transition-all duration-300 ${
@@ -127,7 +188,7 @@ FEEDBACK_SCORE = 1.00 (Max Integrity)`;
                   <ShieldCheck className={`w-4 h-4 ${textPrimary}`} />
                   Credentials Auditor
                 </span>
-                <span className="text-[9px] text-[#00ff66] flex items-center gap-1 animate-pulse">
+                <span className="text-[9px] text-green-500 flex items-center gap-1 animate-pulse">
                   ● SIGNATURE_VALID
                 </span>
               </div>
@@ -141,7 +202,7 @@ FEEDBACK_SCORE = 1.00 (Max Integrity)`;
                 </div>
 
                 <div className="bg-black/80 p-4 rounded border border-neutral-900 text-[11px] leading-relaxed whitespace-pre font-light text-neutral-300 overflow-x-auto">
-                  {getLogVerification(activeMilestoneId)}
+                  {getLogVerification(milestones.find(m => m.id === activeMilestoneId))}
                 </div>
               </div>
             </div>
