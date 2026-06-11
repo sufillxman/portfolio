@@ -1,0 +1,112 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-cyber-bg: #050505;
+  --color-cyber-darker: #020202;
+  --color-cyber-gray: #0f0f0f;
+  --color-cyber-card: #141414;
+  --color-cyber-border: #1f1f1f;
+  --color-cyber-green: #00ff66;
+  --color-cyber-cyan: #00f0ff;
+  --color-cyber-neonText: #39ff14;
+
+  --font-code: "Fira Code", monospace;
+  --font-grotesk: "Space Grotesk", sans-serif;
+
+  --shadow-neon-green: 0 0 10px rgba(0, 255, 102, 0.3), 0 0 20px rgba(0, 255, 102, 0.1);
+  --shadow-neon-cyan: 0 0 10px rgba(0, 240, 255, 0.3), 0 0 20px rgba(0, 240, 255, 0.1);
+  --shadow-neon-green-glow: 0 0 15px rgba(0, 255, 102, 0.6);
+  --shadow-neon-cyan-glow: 0 0 15px rgba(0, 240, 255, 0.6);
+
+  --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #050505;
+  color: #e2e8f0;
+  font-family: 'Space Grotesk', sans-serif;
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #050505;
+  border-left: 1px solid #1f1f1f;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1a1a1a;
+  border: 2px solid #050505;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00ff66;
+  box-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
+}
+
+/* Cyber Selection Highlight */
+::selection {
+  background-color: rgba(0, 255, 102, 0.2);
+  color: #00ff66;
+}
+
+/* Custom styles for terminal and matrix animations */
+.terminal-glow {
+  box-shadow: 0 0 30px rgba(0, 255, 102, 0.05);
+}
+
+.terminal-header-btn {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+/* Scanline and Flicker Effects for Cyberpunk vibe */
+.scanlines {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.25) 50%
+  );
+  background-size: 100% 4px;
+  z-index: 99;
+  pointer-events: none;
+  opacity: 0.15;
+}
+
+@keyframes textShadow {
+  0 {
+    text-shadow: 0.4389600818299703px 0 1px rgba(0,30,255,0.5), -0.4389600818299703px 0 1px rgba(255,0,80,0.3), 0 0 3px;
+  }
+  5% {
+    text-shadow: 2.7928974010788217px 0 1px rgba(0,30,255,0.5), -2.7928974010788217px 0 1px rgba(255,0,80,0.3), 0 0 3px;
+  }
+  100% {
+    text-shadow: 2.0674914838106895px 0 1px rgba(0,30,255,0.5), -2.0674914838106895px 0 1px rgba(255,0,80,0.3), 0 0 3px;
+  }
+}
+
+.cyber-glitch-text:hover {
+  animation: textShadow 0.15s infinite;
+}
+
+.tech-pill {
+  font-family: 'Fira Code', monospace;
+}
